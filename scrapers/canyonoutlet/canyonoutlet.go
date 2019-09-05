@@ -1,8 +1,9 @@
-package scrapers
+package canyonoutlet
 
 import (
 	"net/http"
 
+	"github.com/beeronbeard/go-watch-that-site/scrapers"
 	"golang.org/x/net/html"
 )
 
@@ -13,8 +14,8 @@ type CanyonOutlet struct {
 }
 
 // FindProducts searches for Canyon Outlet products
-func (c *CanyonOutlet) FindProducts() ([]Product, error) {
-	var products []Product
+func (c *CanyonOutlet) FindProducts() ([]scrapers.Product, error) {
+	var products []scrapers.Product
 
 	response, err := c.Client.Get(c.URI)
 	if err != nil {
@@ -47,7 +48,7 @@ func (c *CanyonOutlet) FindProducts() ([]Product, error) {
 	return products, nil
 }
 
-func getProductInfo(node *html.Node) Product {
+func getProductInfo(node *html.Node) scrapers.Product {
 	var name, uri string
 	for _, attr := range node.Attr {
 		if attr.Key == "aria-label" {
@@ -59,5 +60,5 @@ func getProductInfo(node *html.Node) Product {
 		}
 	}
 
-	return Product{name, uri}
+	return scrapers.Product{Name: name, URI: uri}
 }

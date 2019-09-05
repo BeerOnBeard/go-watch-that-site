@@ -1,16 +1,18 @@
-package scrapers
+package canyonoutlet
 
 import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/beeronbeard/go-watch-that-site/scrapers"
 )
 
-var expectedProducts = []Product{
-	Product{"Exceed CF SL 6.9 Pro Race  Price: $2,159.99", "https://www.canyon.com/en-us/outlet/mountain-bikes/exceed-cf-sl-6.9-pro-race/1321.html?dwvar_1321_pv_rahmenfarbe=BK&dwvar_1321_pv_rahmengroesse=XS"},
-	Product{"Spectral AL 6.0  Price: $2,470.00", "/en-us/outlet/mountain-bikes/spectral-al-6.0/50008701_M05301B18H0750-3.html"},
-	Product{"Torque CF 7.0  Price: $3,500.00", "https://www.canyon.com/en-us/outlet/mountain-bikes/torque-cf-7.0/2541.html?dwvar_2541_pv_rahmengroesse=XL&dwvar_2541_pv_rahmenfarbe=BK%2FBU"},
+var expectedProducts = []scrapers.Product{
+	scrapers.Product{Name: "Exceed CF SL 6.9 Pro Race  Price: $2,159.99", URI: "https://www.canyon.com/en-us/outlet/mountain-bikes/exceed-cf-sl-6.9-pro-race/1321.html?dwvar_1321_pv_rahmenfarbe=BK&dwvar_1321_pv_rahmengroesse=XS"},
+	scrapers.Product{Name: "Spectral AL 6.0  Price: $2,470.00", URI: "/en-us/outlet/mountain-bikes/spectral-al-6.0/50008701_M05301B18H0750-3.html"},
+	scrapers.Product{Name: "Torque CF 7.0  Price: $3,500.00", URI: "https://www.canyon.com/en-us/outlet/mountain-bikes/torque-cf-7.0/2541.html?dwvar_2541_pv_rahmengroesse=XL&dwvar_2541_pv_rahmenfarbe=BK%2FBU"},
 }
 
 func TestFindProducts(t *testing.T) {

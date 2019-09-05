@@ -6,26 +6,13 @@ import (
 	"net/http"
 
 	"github.com/beeronbeard/go-watch-that-site/scrapers"
-	"golang.org/x/net/html"
 )
 
 const canyonOutletURI = "https://www.canyon.com/en-us/outlet/mountain-bikes/"
 
 func main() {
-	response, err := http.Get(canyonOutletURI)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	defer response.Body.Close()
-	doc, err := html.Parse(response.Body)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	c := scrapers.CanyonOutlet{}
-	products, err := c.FindProducts(doc)
+	c := scrapers.CanyonOutlet{Client: http.DefaultClient, URI: canyonOutletURI}
+	products, err := c.FindProducts()
 	if err != nil {
 		log.Fatal(err)
 		return

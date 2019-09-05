@@ -1,15 +1,31 @@
 package scrapers
 
 import (
+	"net/http"
+
 	"golang.org/x/net/html"
 )
 
 // CanyonOutlet is a scraper for the Canyon Outlet
-type CanyonOutlet struct{}
+type CanyonOutlet struct {
+	Client *http.Client
+	URI    string
+}
 
-// FindProducts searches the doc for Canyon Outlet products
-func (CanyonOutlet) FindProducts(doc *html.Node) ([]Product, error) {
+// FindProducts searches for Canyon Outlet products
+func (c *CanyonOutlet) FindProducts() ([]Product, error) {
 	var products []Product
+
+	response, err := c.Client.Get(c.URI)
+	if err != nil {
+		return nil, err
+	}
+
+	defer response.Body.Close()
+	doc, err := html.Parse(response.Body)
+	if err != nil {
+		return nil, err
+	}
 
 	var f func(*html.Node)
 	f = func(n *html.Node) {

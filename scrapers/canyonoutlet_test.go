@@ -1,11 +1,10 @@
 package scrapers
 
 import (
-	"bytes"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"testing"
-
-	"golang.org/x/net/html"
 )
 
 var expectedProducts = []Product{
@@ -20,14 +19,13 @@ func TestFindProducts(t *testing.T) {
 		t.Fatalf("Could not read file. %v", err)
 	}
 
-	reader := bytes.NewReader(data)
-	doc, err := html.Parse(reader)
-	if err != nil {
-		t.Fatalf("Could not parse html. %v", err)
-	}
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Write(data)
+	}))
+	defer server.Close()
 
-	c := CanyonOutlet{}
-	products, err := c.FindProducts(doc)
+	c := CanyonOutlet{server.Client(), server.URL}
+	products, err := c.FindProducts()
 	if err != nil {
 		t.Fatalf("FindProducts failed. %v", err)
 	}

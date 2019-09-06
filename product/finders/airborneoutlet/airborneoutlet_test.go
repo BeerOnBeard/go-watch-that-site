@@ -27,11 +27,11 @@ func TestFindProducts(t *testing.T) {
 	}))
 	defer server.Close()
 
-	a := AirborneOutlet{server.Client(), server.URL}
+	finder := AirborneOutlet{server.Client(), server.URL}
 	productChannel := make(chan *product.Product)
 	errorChannel := make(chan *error)
 	completeChannel := make(chan bool)
-	go a.FindProducts(productChannel, errorChannel, completeChannel)
+	go finder.Find(productChannel, errorChannel, completeChannel)
 
 	var products []product.Product
 

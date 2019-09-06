@@ -1,4 +1,4 @@
-package storage
+package storer
 
 import (
 	"encoding/json"
@@ -8,23 +8,23 @@ import (
 	"github.com/beeronbeard/go-watch-that-site/product"
 )
 
-type fileStorage struct {
+type fileStorer struct {
 	FilePath string
 }
 
-// NewFile creates a new instance of ProductStorage backed by a file at path
-func NewFile(path string) product.Storage {
-	return &fileStorage{FilePath: path}
+// New creates a new instance of a product storer backed by a file at path
+func New(path string) product.Storer {
+	return &fileStorer{FilePath: path}
 }
 
 // Get retrieves the products stored
-func (s *fileStorage) Get() ([]*product.Product, error) {
-	_, err := os.Stat(s.FilePath)
+func (storer *fileStorer) Get() ([]*product.Product, error) {
+	_, err := os.Stat(storer.FilePath)
 	if os.IsNotExist(err) {
 		return []*product.Product{}, nil
 	}
 
-	content, err := ioutil.ReadFile(s.FilePath)
+	content, err := ioutil.ReadFile(storer.FilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -39,8 +39,8 @@ func (s *fileStorage) Get() ([]*product.Product, error) {
 }
 
 // Put replaces the stored products
-func (s *fileStorage) Put(products []*product.Product) error {
-	file, err := os.OpenFile(s.FilePath, os.O_WRONLY|os.O_CREATE, 0600)
+func (storer *fileStorer) Put(products []*product.Product) error {
+	file, err := os.OpenFile(storer.FilePath, os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return err
 	}

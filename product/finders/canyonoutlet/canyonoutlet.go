@@ -7,15 +7,15 @@ import (
 	"golang.org/x/net/html"
 )
 
-// CanyonOutlet is a scraper for the Canyon Outlet
+// CanyonOutlet is a product finder for the Canyon Outlet
 type CanyonOutlet struct {
 	Client *http.Client
 	URI    string
 }
 
-// FindProducts in the Canyon Outlet
-func (c *CanyonOutlet) FindProducts(productChannel chan *product.Product, errorChannel chan *error, completeChannel chan bool) {
-	response, err := c.Client.Get(c.URI)
+// Find products in the Canyon Outlet
+func (finder *CanyonOutlet) Find(productChannel chan *product.Product, errorChannel chan *error, completeChannel chan bool) {
+	response, err := finder.Client.Get(finder.URI)
 	if err != nil {
 		errorChannel <- &err
 		completeChannel <- true

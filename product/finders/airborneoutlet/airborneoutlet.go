@@ -8,16 +8,16 @@ import (
 	"golang.org/x/net/html"
 )
 
-// AirborneOutlet is a scraper for the Airborne Outlet
+// AirborneOutlet is a product finder for the Airborne Outlet
 type AirborneOutlet struct {
 	Client *http.Client
 	URI    string
 }
 
-// FindProducts in the Airborne Outlet
-func (a *AirborneOutlet) FindProducts(productChannel chan *product.Product, errorChannel chan *error, completeChannel chan bool) {
+// Find products in the Airborne Outlet
+func (finder *AirborneOutlet) Find(productChannel chan *product.Product, errorChannel chan *error, completeChannel chan bool) {
 
-	response, err := a.Client.Get(a.URI)
+	response, err := finder.Client.Get(finder.URI)
 	if err != nil {
 		errorChannel <- &err
 		completeChannel <- true

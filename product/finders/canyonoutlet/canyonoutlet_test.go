@@ -30,8 +30,8 @@ func TestFindProducts(t *testing.T) {
 	errorChannel := make(chan *error)
 	completeChannel := make(chan bool)
 
-	c := CanyonOutlet{server.Client(), server.URL}
-	go c.FindProducts(productChannel, errorChannel, completeChannel)
+	finder := CanyonOutlet{server.Client(), server.URL}
+	go finder.Find(productChannel, errorChannel, completeChannel)
 
 	var products []product.Product
 

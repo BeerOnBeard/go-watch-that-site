@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/beeronbeard/go-watch-that-site/product"
-	"github.com/beeronbeard/go-watch-that-site/product/scrapers/airborneoutlet"
-	"github.com/beeronbeard/go-watch-that-site/product/scrapers/canyonoutlet"
-	"github.com/beeronbeard/go-watch-that-site/product/storage"
+	"github.com/beeronbeard/go-watch-that-site/product/finders/airborneoutlet"
+	"github.com/beeronbeard/go-watch-that-site/product/finders/canyonoutlet"
+	"github.com/beeronbeard/go-watch-that-site/product/storer"
 )
 
 const (
@@ -27,7 +27,7 @@ func main() {
 	completeChannel := make(chan bool)
 
 	for _, finder := range finders {
-		go finder.FindProducts(productChannel, errorChannel, completeChannel)
+		go finder.Find(productChannel, errorChannel, completeChannel)
 	}
 
 	completeCount := 0
@@ -48,9 +48,9 @@ loop:
 		}
 	}
 
-	storage := storage.NewFile(productsFilePath)
+	storer := storer.New(productsFilePath)
 
-	storedProducts, err := storage.Get()
+	storedProducts, err := storer.Get()
 	if err != nil {
 		panic(err)
 	}
@@ -84,7 +84,7 @@ removedProductsLoop:
 		fmt.Printf("Removed: %v", removedProducts)
 	}
 
-	err = storage.Put(products)
+	err = storer.Put(products)
 	if err != nil {
 		panic(err)
 	}

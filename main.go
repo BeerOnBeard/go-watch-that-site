@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
+	"github.com/beeronbeard/go-watch-that-site/scrapers"
 	"github.com/beeronbeard/go-watch-that-site/scrapers/airborneoutlet"
 	"github.com/beeronbeard/go-watch-that-site/scrapers/canyonoutlet"
 )
@@ -15,20 +15,33 @@ const (
 )
 
 func main() {
-	c := canyonoutlet.CanyonOutlet{Client: http.DefaultClient, URI: canyonOutletURI}
-	a := airborneoutlet.AirborneOutlet{Client: http.DefaultClient, URI: airborneOutletURI}
-	canyonProducts, err := c.FindProducts()
-	if err != nil {
-		log.Fatal(err)
-		return
+	finders := []scrapers.ProductFinder{
+		&canyonoutlet.CanyonOutlet{Client: http.DefaultClient, URI: canyonOutletURI},
+		&airborneoutlet.AirborneOutlet{Client: http.DefaultClient, URI: airborneOutletURI},
 	}
 
-	airborneProducts, err := a.FindProducts()
-	if err != nil {
-		log.Fatal(err)
-		return
+	productChannel := make(chan *scrapers.Product)
+	errorChannel := make(chan *error)
+	completeChannel := make(chan bool)
+
+	for _, finder := range finders {
+		go finder.FindProducts(productChannel, errorChannel, completeChannel)
 	}
 
-	fmt.Print(canyonProducts)
-	fmt.Print(airborneProducts)
+	completeCount := 0
+
+loop:
+	for {
+		select {
+		case product := <-productChannel:
+			fmt.Println(product)
+		case err := <-errorChannel:
+			fmt.Println(err)
+		case <-completeChannel:
+			completeCount++
+			if completeCount == len(finders) {
+				break loop
+			}
+		}
+	}
 }

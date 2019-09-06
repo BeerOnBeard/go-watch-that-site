@@ -15,18 +15,21 @@ type AirborneOutlet struct {
 }
 
 // FindProducts in the Airborne Outlet
-func (a *AirborneOutlet) FindProducts() ([]scrapers.Product, error) {
-	var products []scrapers.Product
+func (a *AirborneOutlet) FindProducts(productChannel chan *scrapers.Product, errorChannel chan *error, completeChannel chan bool) {
 
 	response, err := a.Client.Get(a.URI)
 	if err != nil {
-		return nil, err
+		errorChannel <- &err
+		completeChannel <- true
+		return
 	}
 
 	defer response.Body.Close()
 	doc, err := html.Parse(response.Body)
 	if err != nil {
-		return nil, err
+		errorChannel <- &err
+		completeChannel <- true
+		return
 	}
 
 	var f func(*html.Node)
@@ -34,7 +37,8 @@ func (a *AirborneOutlet) FindProducts() ([]scrapers.Product, error) {
 		if n.Type == html.ElementNode && n.Data == "a" {
 			for _, attr := range n.Attr {
 				if attr.Key == "class" && strings.Contains(attr.Val, "product-info__caption") {
-					products = append(products, getProductInfo(n))
+					product := getProductInfo(n)
+					productChannel <- &product
 				}
 			}
 		}
@@ -45,8 +49,7 @@ func (a *AirborneOutlet) FindProducts() ([]scrapers.Product, error) {
 	}
 
 	f(doc)
-
-	return products, nil
+	completeChannel <- true
 }
 
 /*

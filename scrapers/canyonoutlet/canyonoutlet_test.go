@@ -26,10 +26,25 @@ func TestFindProducts(t *testing.T) {
 	}))
 	defer server.Close()
 
+	productChannel := make(chan *scrapers.Product)
+	errorChannel := make(chan *error)
+	completeChannel := make(chan bool)
+
 	c := CanyonOutlet{server.Client(), server.URL}
-	products, err := c.FindProducts()
-	if err != nil {
-		t.Fatalf("FindProducts failed. %v", err)
+	go c.FindProducts(productChannel, errorChannel, completeChannel)
+
+	var products []scrapers.Product
+
+loop:
+	for {
+		select {
+		case product := <-productChannel:
+			products = append(products, *product)
+		case err := <-errorChannel:
+			t.Fatal(err)
+		case <-completeChannel:
+			break loop
+		}
 	}
 
 	if products[0] != expectedProducts[0] {

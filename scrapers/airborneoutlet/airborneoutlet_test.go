@@ -28,9 +28,23 @@ func TestFindProducts(t *testing.T) {
 	defer server.Close()
 
 	a := AirborneOutlet{server.Client(), server.URL}
-	products, err := a.FindProducts()
-	if err != nil {
-		t.Fatalf("FindProducts failed. %v", err)
+	productChannel := make(chan *scrapers.Product)
+	errorChannel := make(chan *error)
+	completeChannel := make(chan bool)
+	go a.FindProducts(productChannel, errorChannel, completeChannel)
+
+	var products []scrapers.Product
+
+loop:
+	for {
+		select {
+		case product := <-productChannel:
+			products = append(products, *product)
+		case err := <-errorChannel:
+			t.Fatal(err)
+		case <-completeChannel:
+			break loop
+		}
 	}
 
 	if products[0] != expectedProducts[0] {

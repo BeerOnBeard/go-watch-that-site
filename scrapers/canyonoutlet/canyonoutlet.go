@@ -13,19 +13,21 @@ type CanyonOutlet struct {
 	URI    string
 }
 
-// FindProducts searches for Canyon Outlet products
-func (c *CanyonOutlet) FindProducts() ([]scrapers.Product, error) {
-	var products []scrapers.Product
-
+// FindProducts in the Canyon Outlet
+func (c *CanyonOutlet) FindProducts(productChannel chan *scrapers.Product, errorChannel chan *error, completeChannel chan bool) {
 	response, err := c.Client.Get(c.URI)
 	if err != nil {
-		return nil, err
+		errorChannel <- &err
+		completeChannel <- true
+		return
 	}
 
 	defer response.Body.Close()
 	doc, err := html.Parse(response.Body)
 	if err != nil {
-		return nil, err
+		errorChannel <- &err
+		completeChannel <- true
+		return
 	}
 
 	var f func(*html.Node)
@@ -33,7 +35,8 @@ func (c *CanyonOutlet) FindProducts() ([]scrapers.Product, error) {
 		if n.Type == html.ElementNode && n.Data == "a" {
 			for _, attr := range n.Attr {
 				if attr.Key == "class" && attr.Val == "productTile__link" {
-					products = append(products, getProductInfo(n))
+					product := getProductInfo(n)
+					productChannel <- &product
 				}
 			}
 		}
@@ -44,8 +47,7 @@ func (c *CanyonOutlet) FindProducts() ([]scrapers.Product, error) {
 	}
 
 	f(doc)
-
-	return products, nil
+	completeChannel <- true
 }
 
 func getProductInfo(node *html.Node) scrapers.Product {

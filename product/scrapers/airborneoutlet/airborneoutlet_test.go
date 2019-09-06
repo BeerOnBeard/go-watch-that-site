@@ -6,14 +6,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/beeronbeard/go-watch-that-site/scrapers"
+	"github.com/beeronbeard/go-watch-that-site/product"
 )
 
-var expectedProducts = []scrapers.Product{
-	scrapers.Product{Name: "Seeker 29 $ 729.95", URI: "/collections/outlet/products/seeker"},
-	scrapers.Product{Name: "Griffin 27.5+ (Demo Bike) $ 899.95", URI: "/collections/outlet/products/griffin-27-5-demo-bike"},
-	scrapers.Product{Name: "Goblin 29 (Demo Bike) $ 999.95", URI: "/collections/outlet/products/goblin-29-demo-bike"},
-	scrapers.Product{Name: "Goblin EVO 27.5 (Demo Bike) $ 1,199.95", URI: "/collections/outlet/products/goblin-evo-27-5-demo-bike"},
+var expectedProducts = []product.Product{
+	product.Product{Name: "Seeker 29 $ 729.95", URI: "/collections/outlet/products/seeker"},
+	product.Product{Name: "Griffin 27.5+ (Demo Bike) $ 899.95", URI: "/collections/outlet/products/griffin-27-5-demo-bike"},
+	product.Product{Name: "Goblin 29 (Demo Bike) $ 999.95", URI: "/collections/outlet/products/goblin-29-demo-bike"},
+	product.Product{Name: "Goblin EVO 27.5 (Demo Bike) $ 1,199.95", URI: "/collections/outlet/products/goblin-evo-27-5-demo-bike"},
 }
 
 func TestFindProducts(t *testing.T) {
@@ -28,12 +28,12 @@ func TestFindProducts(t *testing.T) {
 	defer server.Close()
 
 	a := AirborneOutlet{server.Client(), server.URL}
-	productChannel := make(chan *scrapers.Product)
+	productChannel := make(chan *product.Product)
 	errorChannel := make(chan *error)
 	completeChannel := make(chan bool)
 	go a.FindProducts(productChannel, errorChannel, completeChannel)
 
-	var products []scrapers.Product
+	var products []product.Product
 
 loop:
 	for {

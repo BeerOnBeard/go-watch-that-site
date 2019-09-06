@@ -6,13 +6,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/beeronbeard/go-watch-that-site/scrapers"
+	"github.com/beeronbeard/go-watch-that-site/product"
 )
 
-var expectedProducts = []scrapers.Product{
-	scrapers.Product{Name: "Exceed CF SL 6.9 Pro Race  Price: $2,159.99", URI: "https://www.canyon.com/en-us/outlet/mountain-bikes/exceed-cf-sl-6.9-pro-race/1321.html?dwvar_1321_pv_rahmenfarbe=BK&dwvar_1321_pv_rahmengroesse=XS"},
-	scrapers.Product{Name: "Spectral AL 6.0  Price: $2,470.00", URI: "/en-us/outlet/mountain-bikes/spectral-al-6.0/50008701_M05301B18H0750-3.html"},
-	scrapers.Product{Name: "Torque CF 7.0  Price: $3,500.00", URI: "https://www.canyon.com/en-us/outlet/mountain-bikes/torque-cf-7.0/2541.html?dwvar_2541_pv_rahmengroesse=XL&dwvar_2541_pv_rahmenfarbe=BK%2FBU"},
+var expectedProducts = []product.Product{
+	product.Product{Name: "Exceed CF SL 6.9 Pro Race  Price: $2,159.99", URI: "https://www.canyon.com/en-us/outlet/mountain-bikes/exceed-cf-sl-6.9-pro-race/1321.html?dwvar_1321_pv_rahmenfarbe=BK&dwvar_1321_pv_rahmengroesse=XS"},
+	product.Product{Name: "Spectral AL 6.0  Price: $2,470.00", URI: "/en-us/outlet/mountain-bikes/spectral-al-6.0/50008701_M05301B18H0750-3.html"},
+	product.Product{Name: "Torque CF 7.0  Price: $3,500.00", URI: "https://www.canyon.com/en-us/outlet/mountain-bikes/torque-cf-7.0/2541.html?dwvar_2541_pv_rahmengroesse=XL&dwvar_2541_pv_rahmenfarbe=BK%2FBU"},
 }
 
 func TestFindProducts(t *testing.T) {
@@ -26,14 +26,14 @@ func TestFindProducts(t *testing.T) {
 	}))
 	defer server.Close()
 
-	productChannel := make(chan *scrapers.Product)
+	productChannel := make(chan *product.Product)
 	errorChannel := make(chan *error)
 	completeChannel := make(chan bool)
 
 	c := CanyonOutlet{server.Client(), server.URL}
 	go c.FindProducts(productChannel, errorChannel, completeChannel)
 
-	var products []scrapers.Product
+	var products []product.Product
 
 loop:
 	for {

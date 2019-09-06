@@ -3,7 +3,7 @@ package canyonoutlet
 import (
 	"net/http"
 
-	"github.com/beeronbeard/go-watch-that-site/scrapers"
+	"github.com/beeronbeard/go-watch-that-site/product"
 	"golang.org/x/net/html"
 )
 
@@ -14,7 +14,7 @@ type CanyonOutlet struct {
 }
 
 // FindProducts in the Canyon Outlet
-func (c *CanyonOutlet) FindProducts(productChannel chan *scrapers.Product, errorChannel chan *error, completeChannel chan bool) {
+func (c *CanyonOutlet) FindProducts(productChannel chan *product.Product, errorChannel chan *error, completeChannel chan bool) {
 	response, err := c.Client.Get(c.URI)
 	if err != nil {
 		errorChannel <- &err
@@ -50,7 +50,7 @@ func (c *CanyonOutlet) FindProducts(productChannel chan *scrapers.Product, error
 	completeChannel <- true
 }
 
-func getProductInfo(node *html.Node) scrapers.Product {
+func getProductInfo(node *html.Node) product.Product {
 	var name, uri string
 	for _, attr := range node.Attr {
 		if attr.Key == "aria-label" {
@@ -62,5 +62,5 @@ func getProductInfo(node *html.Node) scrapers.Product {
 		}
 	}
 
-	return scrapers.Product{Name: name, URI: uri}
+	return product.Product{Name: name, URI: uri}
 }

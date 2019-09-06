@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/beeronbeard/go-watch-that-site/scrapers"
+	"github.com/beeronbeard/go-watch-that-site/product"
 	"golang.org/x/net/html"
 )
 
@@ -15,7 +15,7 @@ type AirborneOutlet struct {
 }
 
 // FindProducts in the Airborne Outlet
-func (a *AirborneOutlet) FindProducts(productChannel chan *scrapers.Product, errorChannel chan *error, completeChannel chan bool) {
+func (a *AirborneOutlet) FindProducts(productChannel chan *product.Product, errorChannel chan *error, completeChannel chan bool) {
 
 	response, err := a.Client.Get(a.URI)
 	if err != nil {
@@ -66,7 +66,7 @@ func (a *AirborneOutlet) FindProducts(productChannel chan *scrapers.Product, err
 	</div>
 </a>
 */
-func getProductInfo(node *html.Node) scrapers.Product {
+func getProductInfo(node *html.Node) product.Product {
 	var name, uri string
 
 	for _, attr := range node.Attr {
@@ -80,5 +80,5 @@ func getProductInfo(node *html.Node) scrapers.Product {
 	priceNode := node.LastChild.LastChild.PrevSibling.FirstChild.NextSibling.FirstChild
 	name = titleNode.Data + " " + priceNode.Data
 
-	return scrapers.Product{Name: name, URI: uri}
+	return product.Product{Name: name, URI: uri}
 }

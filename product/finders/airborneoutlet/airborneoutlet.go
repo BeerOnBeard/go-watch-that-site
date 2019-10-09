@@ -14,6 +14,10 @@ type AirborneOutlet struct {
 	URI    string
 }
 
+const (
+	baseURI string = "https://airbornebicycles.com"
+)
+
 // Find products in the Airborne Outlet
 func (finder *AirborneOutlet) Find(productChannel chan *product.Product, errorChannel chan *error, completeChannel chan bool) {
 
@@ -34,9 +38,9 @@ func (finder *AirborneOutlet) Find(productChannel chan *product.Product, errorCh
 
 	var f func(*html.Node)
 	f = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "a" {
+		if n.Type == html.ElementNode && n.Data == "div" {
 			for _, attr := range n.Attr {
-				if attr.Key == "class" && strings.Contains(attr.Val, "product-info__caption") {
+				if attr.Key == "class" && strings.Contains(attr.Val, "product-wrap") {
 					product := getProductInfo(n)
 					productChannel <- &product
 				}
@@ -67,18 +71,26 @@ func (finder *AirborneOutlet) Find(productChannel chan *product.Product, errorCh
 </a>
 */
 func getProductInfo(node *html.Node) product.Product {
-	var name, uri string
+	var name, uri, imageURI string
 
-	for _, attr := range node.Attr {
+	linkNode := node.FirstChild.NextSibling.FirstChild.NextSibling
+	for _, attr := range linkNode.Attr {
 		if attr.Key == "href" {
-			uri = attr.Val
+			uri = baseURI + attr.Val
 			break
 		}
 	}
 
-	titleNode := node.LastChild.FirstChild.NextSibling.FirstChild
-	priceNode := node.LastChild.LastChild.PrevSibling.FirstChild.NextSibling.FirstChild
-	name = titleNode.Data + " " + priceNode.Data
+	imageNode := linkNode.FirstChild.NextSibling.FirstChild.NextSibling
+	for _, attr := range imageNode.Attr {
+		if attr.Key == "data-src" {
+			imageURI = "https:" + attr.Val
+		}
 
-	return product.Product{Name: name, URI: uri}
+		if attr.Key == "alt" {
+			name = attr.Val
+		}
+	}
+
+	return product.Product{Name: name, URI: uri, ImageURI: imageURI}
 }

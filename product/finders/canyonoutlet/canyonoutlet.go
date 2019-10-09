@@ -2,6 +2,7 @@ package canyonoutlet
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/beeronbeard/go-watch-that-site/product"
 	"golang.org/x/net/html"
@@ -51,7 +52,7 @@ func (finder *CanyonOutlet) Find(productChannel chan *product.Product, errorChan
 }
 
 func getProductInfo(node *html.Node) product.Product {
-	var name, uri string
+	var name, uri, imageURI string
 	for _, attr := range node.Attr {
 		if attr.Key == "aria-label" {
 			name = attr.Val
@@ -62,5 +63,12 @@ func getProductInfo(node *html.Node) product.Product {
 		}
 	}
 
-	return product.Product{Name: name, URI: uri}
+	imageNode := node.FirstChild.NextSibling.FirstChild.NextSibling.FirstChild.NextSibling.LastChild.PrevSibling
+	for _, attr := range imageNode.Attr {
+		if attr.Key == "data-src" {
+			imageURI = strings.Split(attr.Val, "?")[0]
+		}
+	}
+
+	return product.Product{Name: name, URI: uri, ImageURI: imageURI}
 }

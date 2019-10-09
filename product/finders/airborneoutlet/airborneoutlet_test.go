@@ -10,10 +10,10 @@ import (
 )
 
 var expectedProducts = []product.Product{
-	product.Product{Name: "Seeker 29 $ 729.95", URI: "/collections/outlet/products/seeker"},
-	product.Product{Name: "Griffin 27.5+ (Demo Bike) $ 899.95", URI: "/collections/outlet/products/griffin-27-5-demo-bike"},
-	product.Product{Name: "Goblin 29 (Demo Bike) $ 999.95", URI: "/collections/outlet/products/goblin-29-demo-bike"},
-	product.Product{Name: "Goblin EVO 27.5 (Demo Bike) $ 1,199.95", URI: "/collections/outlet/products/goblin-evo-27-5-demo-bike"},
+	product.Product{Name: "Airborne Seeker 29", URI: "https://airbornebicycles.com/collections/outlet/products/seeker", ImageURI: "//cdn.shopify.com/s/files/1/1067/3142/products/airborne-seeker_900x.png?v=1519945441"},
+	product.Product{Name: "Airborne Griffin 27.5+", URI: "https://airbornebicycles.com/collections/outlet/products/griffin-27-5-demo-bike", ImageURI: "//cdn.shopify.com/s/files/1/1067/3142/products/airborne-griffin_c7099c00-f1dc-4f08-b756-70f89a3982b8_900x.png?v=1527618327"},
+	product.Product{Name: "Airborne Goblin 29", URI: "https://airbornebicycles.com/collections/outlet/products/goblin-29-demo-bike", ImageURI: "//cdn.shopify.com/s/files/1/1067/3142/products/GOBLIN29-Profile_3d5ad1a8-5b4e-451e-8f53-241a64dc3e76_900x.png?v=1557838909"},
+	product.Product{Name: "Airborne Goblin EVO 27.5", URI: "https://airbornebicycles.com/collections/outlet/products/goblin-evo-27-5-demo-bike", ImageURI: "//cdn.shopify.com/s/files/1/1067/3142/products/airborne-goblin-evo_017ccc6b-6af1-4b47-894f-9d78ca2b6fda_900x.png?v=1542738441"},
 }
 
 func TestFindProducts(t *testing.T) {

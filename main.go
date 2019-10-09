@@ -110,19 +110,22 @@ func usage() {
 }
 
 func generateEmailBody(newProducts, removedProducts []*product.Product) string {
-	body := "<html><body><h1>Outlet Bikes Update</h1><h2>New Bikes</h2><table><thead><tr><td>Name</td><td>URI</td></tr></thead><tbody>"
+	body := "<html><body><h1>Outlet Bikes Update</h1><h2>New Bikes</h2>"
 
 	for _, product := range newProducts {
-		body += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", product.Name, product.URI)
+		body += generateProductHTML(product)
 	}
 
-	body += "</tbody></table><h2>Removed Bikes</h2><table><thead><tr><td>Name</td><td>URI</td></tr></thead><tbody>"
+	body += "<h2>Removed Bikes</h2>"
 
 	for _, product := range removedProducts {
-		body += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", product.Name, product.URI)
+		body += generateProductHTML(product)
 	}
 
 	body += "</tbody></table></body></html>"
-
 	return body
+}
+
+func generateProductHTML(p *product.Product) string {
+	return fmt.Sprintf("<a href=\"%s\"><div><h3>%s</h3><img style=\"width:100%%; max-width:800px\" src=\"%s\" /></div></a>", p.URI, p.Name, p.ImageURI)
 }

@@ -2,8 +2,9 @@ package product
 
 // Product contains the name of the product and the direct URI to the product page
 type Product struct {
-	Name string
-	URI  string
+	Name     string
+	URI      string
+	ImageURI string
 }
 
 // Finder finds products and returns them over the channel as they are found

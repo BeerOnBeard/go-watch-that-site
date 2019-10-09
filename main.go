@@ -1,8 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/beeronbeard/go-watch-that-site/product"
 	"github.com/beeronbeard/go-watch-that-site/product/finders/airborneoutlet"
@@ -14,9 +16,21 @@ const (
 	productsFilePath  = "bikes"
 	canyonOutletURI   = "https://www.canyon.com/en-us/outlet/mountain-bikes/"
 	airborneOutletURI = "https://airbornebicycles.com/collections/outlet"
+	emailSubject      = "Outlet Bikes Update!"
 )
 
 func main() {
+	emailTo := flag.String("emailTo", "", "Where to send email to")
+	emailFrom := flag.String("emailFrom", "", "Where to send email from")
+	emailPassword := flag.String("emailPassword", "", "Password for email auth")
+
+	flag.Parse()
+
+	if *emailTo == "" || *emailFrom == "" || *emailPassword == "" {
+		usage()
+		os.Exit(1)
+	}
+
 	finders := []product.Finder{
 		&canyonoutlet.CanyonOutlet{Client: http.DefaultClient, URI: canyonOutletURI},
 		&airborneoutlet.AirborneOutlet{Client: http.DefaultClient, URI: airborneOutletURI},
@@ -80,12 +94,35 @@ removedProductsLoop:
 	}
 
 	if len(newProducts) > 0 || len(removedProducts) > 0 {
-		fmt.Printf("New: %v", newProducts)
-		fmt.Printf("Removed: %v", removedProducts)
+		mailer := GMailer{*emailFrom, *emailPassword}
+		mailer.Send(*emailTo, emailSubject, generateEmailBody(newProducts, removedProducts))
 	}
 
 	err = storer.Put(products)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func usage() {
+	fmt.Println("Usage:")
+	fmt.Println("go-watch-that-site -emailTo=email@email.test -emailFrom=email@email.test -emailPassword=superDuperSecrectH@x0rPa$$w0rd")
+}
+
+func generateEmailBody(newProducts, removedProducts []*product.Product) string {
+	body := "<html><body><h1>Outlet Bikes Update</h1><h2>New Bikes</h2><table><thead><tr><td>Name</td><td>URI</td></tr></thead><tbody>"
+
+	for _, product := range newProducts {
+		body += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", product.Name, product.URI)
+	}
+
+	body += "</tbody></table><h2>Removed Bikes</h2><table><thead><tr><td>Name</td><td>URI</td></tr></thead><tbody>"
+
+	for _, product := range removedProducts {
+		body += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", product.Name, product.URI)
+	}
+
+	body += "</tbody></table></body></html>"
+
+	return body
 }

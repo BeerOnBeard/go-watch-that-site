@@ -14,6 +14,10 @@ type CanyonOutlet struct {
 	URI    string
 }
 
+const (
+	baseURI = "https://www.canyon.com"
+)
+
 // Find products in the Canyon Outlet
 func (finder *CanyonOutlet) Find(productChannel chan *product.Product, errorChannel chan *error, completeChannel chan bool) {
 	response, err := finder.Client.Get(finder.URI)
@@ -59,7 +63,11 @@ func getProductInfo(node *html.Node) product.Product {
 		}
 
 		if attr.Key == "href" {
-			uri = attr.Val
+			if !strings.Contains(attr.Val, baseURI) {
+				uri = baseURI + attr.Val
+			} else {
+				uri = attr.Val
+			}
 		}
 	}
 

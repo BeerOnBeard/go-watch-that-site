@@ -1,6 +1,7 @@
 package airborneoutlet
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -10,10 +11,22 @@ import (
 )
 
 var expectedProducts = []product.Product{
-	product.Product{Name: "Airborne Seeker 29", URI: "https://airbornebicycles.com/collections/outlet/products/seeker", ImageURI: "//cdn.shopify.com/s/files/1/1067/3142/products/airborne-seeker_900x.png?v=1519945441"},
-	product.Product{Name: "Airborne Griffin 27.5+", URI: "https://airbornebicycles.com/collections/outlet/products/griffin-27-5-demo-bike", ImageURI: "//cdn.shopify.com/s/files/1/1067/3142/products/airborne-griffin_c7099c00-f1dc-4f08-b756-70f89a3982b8_900x.png?v=1527618327"},
-	product.Product{Name: "Airborne Goblin 29", URI: "https://airbornebicycles.com/collections/outlet/products/goblin-29-demo-bike", ImageURI: "//cdn.shopify.com/s/files/1/1067/3142/products/GOBLIN29-Profile_3d5ad1a8-5b4e-451e-8f53-241a64dc3e76_900x.png?v=1557838909"},
-	product.Product{Name: "Airborne Goblin EVO 27.5", URI: "https://airbornebicycles.com/collections/outlet/products/goblin-evo-27-5-demo-bike", ImageURI: "//cdn.shopify.com/s/files/1/1067/3142/products/airborne-goblin-evo_017ccc6b-6af1-4b47-894f-9d78ca2b6fda_900x.png?v=1542738441"},
+	product.Product{
+		Name:     "Airborne Seeker 29",
+		URI:      "https://airbornebicycles.com/collections/outlet/products/seeker",
+		ImageURI: "https://cdn.shopify.com/s/files/1/1067/3142/products/airborne-seeker_900x.png?v=1519945441"},
+	product.Product{
+		Name:     "Airborne Griffin 27.5+",
+		URI:      "https://airbornebicycles.com/collections/outlet/products/griffin-27-5-demo-bike",
+		ImageURI: "https://cdn.shopify.com/s/files/1/1067/3142/products/airborne-griffin_c7099c00-f1dc-4f08-b756-70f89a3982b8_900x.png?v=1527618327"},
+	product.Product{
+		Name:     "Airborne Goblin 29",
+		URI:      "https://airbornebicycles.com/collections/outlet/products/goblin-29-demo-bike",
+		ImageURI: "https://cdn.shopify.com/s/files/1/1067/3142/products/GOBLIN29-Profile_3d5ad1a8-5b4e-451e-8f53-241a64dc3e76_900x.png?v=1557838909"},
+	product.Product{
+		Name:     "Airborne Goblin EVO 27.5",
+		URI:      "https://airbornebicycles.com/collections/outlet/products/goblin-evo-27-5-demo-bike",
+		ImageURI: "https://cdn.shopify.com/s/files/1/1067/3142/products/airborne-goblin-evo_017ccc6b-6af1-4b47-894f-9d78ca2b6fda_900x.png?v=1542738441"},
 }
 
 func TestFindProducts(t *testing.T) {
@@ -47,19 +60,15 @@ loop:
 		}
 	}
 
-	if products[0] != expectedProducts[0] {
-		t.Fatal("Seeker not parsed correctly")
-	}
-
-	if products[1] != expectedProducts[1] {
-		t.Fatal("Griffin not parsed correctly")
-	}
-
-	if products[2] != expectedProducts[2] {
-		t.Fatal("Goblin not parsed correctly")
-	}
-
-	if products[3] != expectedProducts[3] {
-		t.Fatal("Goblin EVO not parsed correctly")
+	for i, expectedProduct := range expectedProducts {
+		if products[i] != expectedProduct {
+			fmt.Println(products[i].Name)
+			fmt.Println(expectedProduct.Name)
+			fmt.Println(products[i].URI)
+			fmt.Println(expectedProduct.URI)
+			fmt.Println(products[i].ImageURI)
+			fmt.Println(expectedProduct.ImageURI)
+			t.Fatal(expectedProduct.Name + " not parsed correctly")
+		}
 	}
 }

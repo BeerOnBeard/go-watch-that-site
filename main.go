@@ -20,9 +20,13 @@ const (
 )
 
 func main() {
-	emailTo := flag.String("emailTo", "", "Where to send email to")
-	emailFrom := flag.String("emailFrom", "", "Where to send email from")
-	emailPassword := flag.String("emailPassword", "", "Password for email auth")
+	envEmailTo := os.Getenv("GWTS_EMAIL_TO")
+	envEmailFrom := os.Getenv("GWTS_EMAIL_FROM")
+	envEmailPassword := os.Getenv("GWTS_EMAIL_PASSWORD")
+
+	emailTo := flag.String("emailTo", envEmailTo, "Where to send email to")
+	emailFrom := flag.String("emailFrom", envEmailFrom, "Where to send email from")
+	emailPassword := flag.String("emailPassword", envEmailPassword, "Password for email auth")
 
 	flag.Parse()
 

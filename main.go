@@ -13,61 +13,17 @@ import (
 )
 
 const (
-	productsFilePath  = "bikes"
 	canyonOutletURI   = "https://www.canyon.com/en-us/outlet/mountain-bikes/"
 	airborneOutletURI = "https://airbornebicycles.com/collections/outlet"
 	emailSubject      = "Outlet Bikes Update!"
 )
 
 func main() {
-	envEmailTo := os.Getenv("GWTS_EMAIL_TO")
-	envEmailFrom := os.Getenv("GWTS_EMAIL_FROM")
-	envEmailPassword := os.Getenv("GWTS_EMAIL_PASSWORD")
+	emailTo, emailFrom, emailPassword, productFilePath := gatherOptions()
 
-	emailTo := flag.String("emailTo", envEmailTo, "Where to send email to")
-	emailFrom := flag.String("emailFrom", envEmailFrom, "Where to send email from")
-	emailPassword := flag.String("emailPassword", envEmailPassword, "Password for email auth")
+	products := getProducts()
 
-	flag.Parse()
-
-	if *emailTo == "" || *emailFrom == "" || *emailPassword == "" {
-		usage()
-		os.Exit(1)
-	}
-
-	finders := []product.Finder{
-		&canyonoutlet.CanyonOutlet{Client: http.DefaultClient, URI: canyonOutletURI},
-		&airborneoutlet.AirborneOutlet{Client: http.DefaultClient, URI: airborneOutletURI},
-	}
-
-	productChannel := make(chan *product.Product)
-	errorChannel := make(chan *error)
-	completeChannel := make(chan bool)
-
-	for _, finder := range finders {
-		go finder.Find(productChannel, errorChannel, completeChannel)
-	}
-
-	completeCount := 0
-
-	var products []*product.Product
-loop:
-	for {
-		select {
-		case product := <-productChannel:
-			products = append(products, product)
-		case err := <-errorChannel:
-			panic(err)
-		case <-completeChannel:
-			completeCount++
-			if completeCount == len(finders) {
-				break loop
-			}
-		}
-	}
-
-	storer := storer.New(productsFilePath)
-
+	storer := storer.New(*productFilePath)
 	storedProducts, err := storer.Get()
 	if err != nil {
 		panic(err)
@@ -108,9 +64,67 @@ removedProductsLoop:
 	}
 }
 
+func gatherOptions() (emailTo, emailFrom, emailPassword, productFilePath *string) {
+	envEmailTo := os.Getenv("GWTS_EMAIL_TO")
+	envEmailFrom := os.Getenv("GWTS_EMAIL_FROM")
+	envEmailPassword := os.Getenv("GWTS_EMAIL_PASSWORD")
+	envProductFilePath, isEnvProductFilePathSet := os.LookupEnv("GWTS_PRODUCT_FILE_PATH")
+	if !isEnvProductFilePathSet {
+		envProductFilePath = "bikes"
+	}
+
+	emailTo = flag.String("emailTo", envEmailTo, "Where to send email to")
+	emailFrom = flag.String("emailFrom", envEmailFrom, "Where to send email from")
+	emailPassword = flag.String("emailPassword", envEmailPassword, "Password for email auth")
+	productFilePath = flag.String("productFilePath", envProductFilePath, "File path to save products found between runs")
+
+	flag.Parse()
+
+	if *emailTo == "" || *emailFrom == "" || *emailPassword == "" {
+		usage()
+		os.Exit(1)
+	}
+
+	return
+}
+
 func usage() {
 	fmt.Println("Usage:")
 	fmt.Println("go-watch-that-site -emailTo=email@email.test -emailFrom=email@email.test -emailPassword=superDuperSecrectH@x0rPa$$w0rd")
+}
+
+func getProducts() (products []*product.Product) {
+	finders := []product.Finder{
+		&canyonoutlet.CanyonOutlet{Client: http.DefaultClient, URI: canyonOutletURI},
+		&airborneoutlet.AirborneOutlet{Client: http.DefaultClient, URI: airborneOutletURI},
+	}
+
+	productChannel := make(chan *product.Product)
+	errorChannel := make(chan *error)
+	completeChannel := make(chan bool)
+
+	for _, finder := range finders {
+		go finder.Find(productChannel, errorChannel, completeChannel)
+	}
+
+	completeCount := 0
+
+loop:
+	for {
+		select {
+		case product := <-productChannel:
+			products = append(products, product)
+		case err := <-errorChannel:
+			panic(err)
+		case <-completeChannel:
+			completeCount++
+			if completeCount == len(finders) {
+				break loop
+			}
+		}
+	}
+
+	return
 }
 
 func generateEmailBody(newProducts, removedProducts []*product.Product) string {
